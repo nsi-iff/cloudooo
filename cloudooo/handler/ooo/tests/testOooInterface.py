@@ -27,7 +27,8 @@
 ##############################################################################
 
 import unittest
-from cloudooo.handler.ooo.document import FileSystemDocument, OdfDocument
+from cloudooo.file import File
+from cloudooo.handler.ooo.document import OdfDocument
 from cloudooo.handler.ooo.handler import Handler
 from cloudooo.handler.ooo.application.openoffice import OpenOffice
 from cloudooo.manager import Manager
@@ -77,8 +78,8 @@ class TestInterface(TestCase):
     self.assertEquals(IImageGranulator.names(), method_list)
 
   def testIFile(self):
-    """Test if FileSystemDocument implements IFile"""
-    self.assertTrue(IFile.implementedBy(FileSystemDocument))
+    """Test if File implements IFile"""
+    self.assertTrue(IFile.implementedBy(File))
 
   def testIOdfDocument(self):
     """Test if OdfDocument implements IOdfDocument"""

@@ -36,7 +36,7 @@ from cloudooo.handler.ooo.application.openoffice import openoffice
 from zope.interface import implements
 from cloudooo.interfaces.handler import IHandler
 from cloudooo.handler.ooo.mimemapper import mimemapper
-from cloudooo.handler.ooo.document import FileSystemDocument
+from cloudooo.file import File
 from cloudooo.handler.ooo.monitor.timeout import MonitorTimeout
 from cloudooo.handler.ooo.monitor import monitor_sleeping_time
 from cloudooo.util import logger
@@ -53,9 +53,7 @@ class Handler(object):
 
   def __init__(self, base_folder_url, data, source_format, **kw):
     """Creates document in file system and loads it in OOo."""
-    self.document = FileSystemDocument(base_folder_url,
-                                      data,
-                                      source_format)
+    self.document = File(base_folder_url, data, source_format)
     self.zip = kw.get('zip', False)
     self.uno_path = kw.get("uno_path", None)
     self.office_binary_path = kw.get("office_binary_path", None)

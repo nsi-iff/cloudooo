@@ -33,7 +33,7 @@ from subprocess import Popen, PIPE
 from os.path import exists, join
 from cloudooo.tests.handlerTestCase import HandlerTestCase, make_suite
 from cloudooo.handler.ooo.application.openoffice import openoffice
-from cloudooo.handler.ooo.document import FileSystemDocument
+from cloudooo.file import File
 
 OPENOFFICE = True
 
@@ -49,7 +49,7 @@ class TestUnoConverter(HandlerTestCase):
     openoffice.acquire()
     self.hostname, self.port = openoffice.getAddress()
     data = open("data/test.odt", 'r').read()
-    self.document = FileSystemDocument(self.tmp_url, data, 'odt')
+    self.document = File(self.tmp_url, data, 'odt')
 
   def tearDown(self):
     """Called to unlock the openoffice"""

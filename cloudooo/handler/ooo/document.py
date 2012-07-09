@@ -31,11 +31,6 @@ from zipfile import ZipFile
 from StringIO import StringIO
 from lxml import etree
 from cloudooo.interfaces.file import IOdfDocument
-from cloudooo.file import File
-
-
-class FileSystemDocument(File):
-  pass
 
 
 class OdfDocument(object):

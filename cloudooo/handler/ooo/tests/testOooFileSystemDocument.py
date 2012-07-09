@@ -32,21 +32,21 @@ from StringIO import StringIO
 from base64 import decodestring
 from os import path
 from zipfile import ZipFile
-from cloudooo.handler.ooo.document import FileSystemDocument
+from cloudooo.file import File
 from cloudooo.tests.handlerTestCase import make_suite
 
 
-class TestFileSystemDocument(unittest.TestCase):
-  """Test to class FileSystemDocument"""
+class TestFile(unittest.TestCase):
+  """Test to class File"""
 
   def setUp(self):
-    """Create data to tests and instantiated a FileSystemDocument"""
+    """Create data to tests and instantiated a File"""
     self.tmp_url = '/tmp'
     self.data = decodestring("cloudooo Test")
-    self.fsdocument = FileSystemDocument(self.tmp_url, self.data, 'txt')
+    self.fsdocument = File(self.tmp_url, self.data, 'txt')
 
   def tearDown(self):
-    """Remove the file in file system"""
+    """Remove the file in system"""
     if self.fsdocument.getUrl() is not None:
       self.fsdocument.trash()
 
@@ -119,7 +119,7 @@ class TestFileSystemDocument(unittest.TestCase):
     """Tests if the htm is extrated from zipfile"""
     zip_input_url = 'data/test.zip'
     data = open(zip_input_url).read()
-    zipdocument = FileSystemDocument(self.tmp_url, data, 'zip')
+    zipdocument = File(self.tmp_url, data, 'zip')
     mime = magic.Magic(mime=True)
     mimetype = mime.from_buffer(zipdocument.getContent(True))
     self.assertEquals(mimetype, "application/zip")
@@ -131,4 +131,4 @@ class TestFileSystemDocument(unittest.TestCase):
 
 
 def test_suite():
-  return make_suite(TestFileSystemDocument)
+  return make_suite(TestFile)

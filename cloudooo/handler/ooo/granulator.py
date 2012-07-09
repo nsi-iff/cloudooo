@@ -211,7 +211,7 @@ class OOGranulator(object):
         stylename_list.pop(0)
 
       image_list.append((id, title))
-    
+
     return image_list
 
   def getImage(self, id, format=None, resolution=None, **kw):
