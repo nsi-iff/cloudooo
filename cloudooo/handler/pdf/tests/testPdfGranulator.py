@@ -33,9 +33,10 @@ from cloudooo.handler.pdf.granulator import PDFGranulator
 
 class TestPDFGranulator(HandlerTestCase):
 
-  def setUp(self):
-    data = open('./data/granulate_test.odt').read()
-    self.pdfgranulator = PDFGranulator(data, 'odt')
+  def afterSetUp(self):
+    data = open('./data/test.pdf').read()
+    self.kw = dict(env=dict(PATH=self.env_path))
+    self.pdfgranulator = PDFGranulator(self.tmp_url, data, 'pdf', **self.kw)
 
   def testGetImageItemList(self):
     """Test if getImageItemList() returns the right images list"""
