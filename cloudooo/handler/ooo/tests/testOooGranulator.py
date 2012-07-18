@@ -56,9 +56,9 @@ class TestOOGranulator(HandlerTestCase):
     """Test if getTableItemList() returns the right tables list"""
     data = open('./data/granulate_table_test.odt').read()
     oogranulator = OOGranulator(data, 'odt')
-    table_list = [('Developers', ''),
-                  ('Prices', 'Table 1: Prices table from Mon Restaurant'),
-                  ('SoccerTeams', 'Tabela 2: Soccer Teams')]
+    table_list = [('Developers-pag001', ''),
+                  ('Prices-pag001', 'Table 1: Prices table from Mon Restaurant'),
+                  ('SoccerTeams-pag001', 'Tabela 2: Soccer Teams')]
     self.assertEquals(table_list, oogranulator.getTableItemList())
 
   def testGetTable(self):
@@ -103,18 +103,17 @@ class TestOOGranulator(HandlerTestCase):
              ['Petit Gateau', 'R$ 10,00'],
              ['Feijoada', 'R$ 30,00']]
     self.assertEquals(matrix, oogranulator.getTableMatrix('Prices'))
-
     self.assertEquals(None, oogranulator.getTableMatrix('Non existent'))
 
   def testGetImageItemList(self):
     """Test if getImageItemList() returns the right images list"""
     image_list = self.oogranulator.getImageItemList()
-    self.assertEquals([('10000000000000C80000009C38276C51.jpg', ''),
-                       ('10000201000000C80000004E7B947D46.png', 'TioLive Logo'),
-                       ('10000201000000C80000004E7B947D46.png', ''),
+    self.assertEquals([('10000000000000C80000009C38276C51-pag001.jpg', ''),
+                       ('10000201000000C80000004E7B947D46-pag002.png', 'TioLive Logo'),
+                       ('10000201000000C80000004E7B947D46-pag002.png', ''),
                        # XXX The svg image are stored into odf as svm
-                       ('2000004F00004233000013707E7DE37A.svm', 'Python Logo'),
-                       ('10000201000000C80000004E7B947D46.png',
+                       ('2000004F00004233000013707E7DE37A-pag002.svm', 'Python Logo'),
+                       ('10000201000000C80000004E7B947D46-pag002.png',
                         'Again TioLive Logo')], image_list)
 
   def testGetImageSuccessfully(self):

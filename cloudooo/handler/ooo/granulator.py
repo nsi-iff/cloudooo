@@ -52,6 +52,10 @@ IMAGE_TITLE_XPATH_QUERY = '//draw:text-box/text:p/draw:frame[@draw:style-name="%
 IMAGE_DRAW_NAME_AND_STYLENAME_XPATH_QUERY = '//draw:text-box/text:p/draw:frame'
 CHAPTER_XPATH_QUERY = '//text:p[@text:style-name="Title"]/text:span/text() | //text:h/text:span/text()'
 
+IMAGE_PAGE_BREAK_XPATH = './/text:soft-page-break | %s' % DRAW_XPATH_QUERY
+TABLE_PAGE_BREAK_XPATH = './/text:soft-page-break | %s' % TABLE_XPATH_QUERY
+TAG_PAGE_BREAK = '{urn:oasis:names:tc:opendocument:xmlns:text:1.0}soft-page-break'
+
 def getTemplatePath(format):
   """ Get the path of template file. This should goes to
       some utils library.
@@ -81,19 +85,24 @@ class OOGranulator(object):
 
   def getTableItemList(self):
     """Returns the list of table IDs in the form of (id, title)."""
-    xml_table_list = self.document.parsed_content.xpath(TABLE_XPATH_QUERY,
+    xml_table_list = self.document.parsed_content.xpath(TABLE_PAGE_BREAK_XPATH,
                                 namespaces=self.document.parsed_content.nsmap)
     table_list = []
+    page = 1
+
     for table in xml_table_list:
-      title = ''.join(table.xpath('following-sibling::text:p[position()=1] \
-                          [starts-with(@text:style-name, "Table")]//text()',
-                          namespaces=table.nsmap))
-      if title == '':
+      if table.tag == TAG_PAGE_BREAK:
+        page += 1
+      else:
         title = ''.join(table.xpath('following-sibling::text:p[position()=1] \
-                    [starts-with(@text:style-name, "Tabela")]//text()',
-                    namespaces=table.nsmap))
-      id = table.attrib[TABLE_ATTRIB_NAME]
-      table_list.append((id, title))
+                            [starts-with(@text:style-name, "Table")]//text()',
+                            namespaces=table.nsmap))
+        if title == '':
+          title = ''.join(table.xpath('following-sibling::text:p[position()=1] \
+                      [starts-with(@text:style-name, "Tabela")]//text()',
+                      namespaces=table.nsmap))
+        id = table.attrib[TABLE_ATTRIB_NAME]+'-pag%.3d'%page
+        table_list.append((id, title))
     return table_list
 
   def getTable(self, id, format='odt'):
@@ -189,7 +198,7 @@ class OOGranulator(object):
 
   def getImageItemList(self):
     """Return a list of tuples with the id and title of image files"""
-    xml_image_list = self.document.parsed_content.xpath(DRAW_XPATH_QUERY,
+    xml_image_list = self.document.parsed_content.xpath(IMAGE_PAGE_BREAK_XPATH,
                                 namespaces=self.document.parsed_content.nsmap)
     name_list = []
     stylename_list = []
@@ -198,19 +207,23 @@ class OOGranulator(object):
       stylename_list.append(i.attrib[DRAWING_ATTRIB_STYLENAME])
 
     image_list = []
+    page = 1
 
     for xml_image in xml_image_list:
-      id = xml_image.values()[0].split('/')[-1]
-      title = ''.join(xml_image.xpath(IMAGE_TITLE_XPATH_QUERY%(stylename_list[0], name_list[0], id),
-                                      namespaces=xml_image.nsmap))
-      if title != '':
-        title_list = title.split(':')
-        title = ''.join(title_list[1:])
-        title = title.strip()
-        name_list.pop(0)
-        stylename_list.pop(0)
-
-      image_list.append((id, title))
+      if xml_image.tag == TAG_PAGE_BREAK:
+        page += 1
+      else:
+        id = xml_image.values()[0].split('/')[-1]
+        title = ''.join(xml_image.xpath(IMAGE_TITLE_XPATH_QUERY%(stylename_list[0], name_list[0], id),
+                                        namespaces=xml_image.nsmap))
+        if title != '':
+          title_list = title.split(':')
+          title = ''.join(title_list[1:])
+          title = title.strip()
+          name_list.pop(0)
+          stylename_list.pop(0)
+        id = id.replace('.','-pag%.3d.'%page)
+        image_list.append((id, title))
 
     return image_list
 
