@@ -58,17 +58,20 @@ def removeEqualImages(images):
 def getImages(images):
   """This function verify if there is ppm and pbm and converts it to png
   before return the list of images in document"""
-  imageList = []
+  imagesList = []
   for image in images:
     extension = image.split(".")[-1]
     if extension in ('ppm', 'pbm',):
       img = Handler("/".join(image.split("/")[:-1]), open(image).read(), image.split(".")[-1])
-      new_image = image.split("/")[-1].split(".")[0]+"png"
-      img = open(new_image,'w').write(img.convert("png"))
-      imageList.append([new_image.split("/")[-1], img])
-      img.close()
-      os.remove(image, img)
-  return imageList
+      new_image = image.split(".")[0]+".png"
+      content = img.convert("png")
+      open(new_image,'w').write(content)
+      img = open(new_image).read()
+      imagesList.append([new_image.split("/")[-1], img])
+      os.remove(new_image)
+    else:
+      imagesList.append([image.split("/")[-1], open(image).read()])
+    os.remove(image)
 
 class PDFGranulator(object):
 
@@ -80,13 +83,13 @@ class PDFGranulator(object):
   # XXX - It should have another name for returning all images
   def getImageItemList(self):
     logger.debug("PDFImageGrainExtract")
-    command = ["pdfimage", "-j", self.file.getUrl(), self.grain_directory]
+    command = ["pdfimages", "-j", self.file.getUrl(), "%s/"%self.grain_directory]
     stdout, stderr = Popen(command,
                           stdout=PIPE,
                           stderr=PIPE,
                           close_fds=True,
                           env=self.environment).communicate()
     removeEqualImages(self.grain_directory)
-    imageList = convertPPMImages(self.grain_directory)
-    return imageList
-
+    images = glob("%s/*.*"%self.grain_directory)
+    imagesList = getImages(images)
+    return imagesList
