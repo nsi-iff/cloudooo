@@ -32,28 +32,31 @@ from cloudooo.handler.imagemagick.handler import Handler
 from subprocess import Popen, PIPE
 from tempfile import mkdtemp
 from glob import glob
+import os
 
 try:
   import Image
 except ImportError:
   from PIL import Image
 
-def removeEqualImages(images):
-  """This function verify if images are equals and remove it from same path
-  and it was based on images histogram of nsi.granulate"""
+def removeEqualImages(path):
+  """This function verify if images are equals and remove it from path
+  It was based on images histogram of nsi.granulate"""
   imagesList = []
+  images = glob("%s/*.*"%path)
   for image in images:
     try:
       img = Image.open(image)
-      imageList.append({'filename':image.split("/")[-1],'objImage':img})
+      imagesList.append({'filename':image.split("/")[-1],'objImage':img})
     except IOError:
       pass
-    i=0
-    for imgDict in imageList:
-      i+=1
-      for imgDict2 in imageList[i:]:
-        if imgDict['objImage'].histogram() == imgDict2.histogram()
-          os.remove(os.path.join(path,imgDict2['filename']))
+  i=0
+  for imgDict in imagesList:
+    i+=1
+    for imgDict2 in imagesList[i:]:
+      if imgDict['objImage'].histogram() == imgDict2['objImage'].histogram():
+        imagesList.remove(imgDict2)
+        os.remove(os.path.join(path,imgDict2['filename']))
 
 def getImages(images):
   """This function verify if there is ppm and pbm and converts it to png
@@ -72,13 +75,14 @@ def getImages(images):
     else:
       imagesList.append([image.split("/")[-1], open(image).read()])
     os.remove(image)
+  return imagesList
 
 class PDFGranulator(object):
 
   def __init__(self, base_folder_url, data, source_format, **kw):
     self.file = File(base_folder_url, data, source_format)
     self.environment = kw.get("env", {})
-    self.grain_directory = mkdtemp(dir="%s/%s"%(base_folder_url, 'grains'))
+    self.grain_directory = mkdtemp(dir=base_folder_url)
 
   # XXX - It should have another name for returning all images
   def getImageItemList(self):
