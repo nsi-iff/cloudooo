@@ -52,6 +52,7 @@ IMAGE_TITLE_XPATH_QUERY = '//draw:text-box/text:p/draw:frame[@draw:style-name="%
 IMAGE_DRAW_NAME_AND_STYLENAME_XPATH_QUERY = '//draw:text-box/text:p/draw:frame'
 CHAPTER_XPATH_QUERY = '//text:p[@text:style-name="Title"]/text:span/text() | //text:h/text:span/text()'
 
+# XPath for numbering pages
 IMAGE_PAGE_BREAK_XPATH = './/text:soft-page-break | %s' % DRAW_XPATH_QUERY
 TABLE_PAGE_BREAK_XPATH = './/text:soft-page-break | %s' % TABLE_XPATH_QUERY
 TAG_PAGE_BREAK = '{urn:oasis:names:tc:opendocument:xmlns:text:1.0}soft-page-break'
