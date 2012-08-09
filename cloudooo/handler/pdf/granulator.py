@@ -32,6 +32,7 @@ from cloudooo.handler.imagemagick.handler import Handler
 from subprocess import Popen, PIPE
 from tempfile import mkdtemp
 from glob import glob
+import shutil
 import os
 
 try:
@@ -71,10 +72,8 @@ def getImages(images):
       open(new_image,'w').write(content)
       img = open(new_image).read()
       imagesList.append([new_image.split("/")[-1], img])
-      os.remove(new_image)
     else:
       imagesList.append([image.split("/")[-1], open(image).read()])
-    os.remove(image)
   return imagesList
 
 class PDFGranulator(object):
@@ -96,4 +95,5 @@ class PDFGranulator(object):
     removeEqualImages(self.grain_directory)
     images = glob("%s/*.*"%self.grain_directory)
     imagesList = getImages(images)
+    shutil.rmtree(self.grain_directory)
     return imagesList
