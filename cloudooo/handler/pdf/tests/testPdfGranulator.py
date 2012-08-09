@@ -41,6 +41,8 @@ class TestPDFGranulator(HandlerTestCase):
   def testGetImageItemList(self):
     """Test if getImageItemList() returns the right images list"""
     image_list = self.pdfgranulator.getImageItemList()
+    self.assertEquals(image_list[0][0], '001-pag001.png')
+    self.assertEquals(image_list[-1][0], '012-pag004.jpg')
     self.assertEquals(len(image_list), 12)
 
 def test_suite():
