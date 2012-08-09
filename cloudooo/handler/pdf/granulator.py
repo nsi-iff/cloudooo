@@ -46,14 +46,18 @@ def removeEqualImages(path):
   imagesList = []
   images = glob("%s/*.*"%path)
   for image in images:
+    if image.split(".")[-1] == 'html':
+      os.remove(os.path.join(path,image))
+      continue
     try:
       img = Image.open(image)
       imagesList.append({'filename':image.split("/")[-1],'objImage':img})
     except IOError:
       pass
-  i=0
+  i = 0
+  imagesList.sort()
   for imgDict in imagesList:
-    i+=1
+    i += 1
     for imgDict2 in imagesList[i:]:
       if imgDict['objImage'].histogram() == imgDict2['objImage'].histogram():
         imagesList.remove(imgDict2)
@@ -63,17 +67,22 @@ def getImages(images):
   """This function verify if there is ppm and pbm and converts it to png
   before return the list of images in document"""
   imagesList = []
+  images.sort()
+  id = 0
   for image in images:
+    id += 1
+    page = int(image.split('/-')[-1].split('_')[0])
     extension = image.split(".")[-1]
+    title = image.split('-')[0] + "%.3d-pag%.3d." % (id,page) + extension
     if extension in ('ppm', 'pbm',):
       img = Handler("/".join(image.split("/")[:-1]), open(image).read(), image.split(".")[-1])
       new_image = image.split(".")[0]+".png"
       content = img.convert("png")
       open(new_image,'w').write(content)
       img = open(new_image).read()
-      imagesList.append([new_image.split("/")[-1], img])
+      imagesList.append([title.split("/")[-1], img])
     else:
-      imagesList.append([image.split("/")[-1], open(image).read()])
+      imagesList.append([title.split("/")[-1], open(image).read()])
   return imagesList
 
 class PDFGranulator(object):
@@ -86,7 +95,7 @@ class PDFGranulator(object):
   # XXX - It should have another name for returning all images
   def getImageItemList(self):
     logger.debug("PDFImageGrainExtract")
-    command = ["pdfimages", "-j", self.file.getUrl(), "%s/"%self.grain_directory]
+    command = ["pdftohtml", self.file.getUrl(), "%s/"%self.grain_directory]
     stdout, stderr = Popen(command,
                           stdout=PIPE,
                           stderr=PIPE,
