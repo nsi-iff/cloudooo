@@ -90,7 +90,7 @@ class PDFGranulator(object):
   def __init__(self, base_folder_url, data, source_format, **kw):
     self.file = File(base_folder_url, data, source_format)
     self.environment = kw.get("env", {})
-    self.grain_directory = mkdtemp(dir=base_folder_url)
+    self.grain_directory = mkdtemp(dir=self.file.directory_name)
 
   # XXX - It should have another name for returning all images
   def getImageItemList(self):
@@ -104,5 +104,5 @@ class PDFGranulator(object):
     removeEqualImages(self.grain_directory)
     images = glob("%s/*.*"%self.grain_directory)
     imagesList = getImages(images)
-    shutil.rmtree(self.grain_directory)
+    self.file.trash()
     return imagesList
