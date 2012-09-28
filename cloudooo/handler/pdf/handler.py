@@ -31,7 +31,7 @@ from cloudooo.interfaces.handler import IHandler
 from cloudooo.file import File
 from cloudooo.util import logger
 from subprocess import Popen, PIPE
-from tempfile import mktemp
+from tempfile import NamedTemporaryFile
 
 
 class Handler(object):
@@ -48,8 +48,8 @@ class Handler(object):
   def convert(self, destination_format=None, **kw):
     """ Convert a pdf document """
     logger.debug("PDFConvert: %s > %s" % (self.document.source_format, destination_format))
-    output_url = mktemp(suffix=".%s" % destination_format,
-                        dir=self.document.directory_name)
+    output_url = NamedTemporaryFile(suffix=".%s" % destination_format,
+                        dir=self.document.directory_name).name
     command = ["pdftotext", self.document.getUrl(), output_url]
     stdout, stderr = Popen(command,
                            stdout=PIPE,
@@ -96,8 +96,8 @@ class Handler(object):
     metadata_file = File(self.document.directory_name,
                          "".join(text_list),
                          "txt")
-    output_url = mktemp(suffix=".pdf",
-                        dir=self.document.directory_name)
+    output_url = NamedTemporaryFile(suffix=".pdf",
+                        dir=self.document.directory_name).name
     command = ["pdftk",
                self.document.getUrl(),
                "update_info",

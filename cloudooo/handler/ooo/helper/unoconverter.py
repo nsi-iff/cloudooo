@@ -32,7 +32,7 @@ import helper_util
 from types import UnicodeType, InstanceType
 from os import environ, putenv
 from os.path import dirname, exists
-from tempfile import mktemp
+from tempfile import NamedTemporaryFile
 from base64 import decodestring, encodestring
 from getopt import getopt, GetoptError
 
@@ -171,8 +171,8 @@ class UnoConverter(object):
       destination_format = "impr.html"
     else:
       destination_format = output_format
-    output_url = mktemp(suffix='.%s' % destination_format,
-                        dir=self.document_dir_path)
+    output_url = NamedTemporaryFile(suffix='.%s' % destination_format,
+                        dir=self.document_dir_path).name
 
     property_list = self._getPropertyToExport(output_format)
     try:

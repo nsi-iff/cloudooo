@@ -63,8 +63,8 @@ class File(object):
     Return the url for the document.
     """
     # creates only the url of the file.
-    file_path = tempfile.mktemp(suffix=".%s" % self.source_format,
-                                dir=self.directory_name)
+    file_path = tempfile.NamedTemporaryFile(suffix=".%s" % self.source_format,
+                                dir=self.directory_name).name
     # stores the data in temporary file
     open(file_path, 'wb').write(self.original_data)
     # If is a zipfile is need extract all files from whitin the compressed file
@@ -96,7 +96,7 @@ class File(object):
     if zip:
       current_dir_url = abspath(curdir)
       chdir(self.directory_name)
-      zip_path = tempfile.mktemp(suffix=".zip", dir=self.directory_name)
+      zip_path = tempfile.NamedTemporaryFile(suffix=".zip", dir=self.directory_name).name
       file_list = listdir(self.directory_name)
       zipfile = ZipFile(zip_path, 'w')
       try:

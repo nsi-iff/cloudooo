@@ -32,7 +32,7 @@ from cloudooo.interfaces.handler import IHandler
 from cloudooo.file import File
 from cloudooo.util import logger
 from subprocess import Popen, PIPE
-from tempfile import mktemp
+from tempfile import NamedTemporaryFile
 
 
 class Handler(object):
@@ -49,8 +49,8 @@ class Handler(object):
   def convert(self, destination_format=None, **kw):
     """Convert a image"""
     logger.debug("ImageMagickConvert: %s > %s" % (self.file.source_format, destination_format))
-    output_url = mktemp(suffix='.%s' % destination_format,
-                        dir=self.base_folder_url)
+    output_url = NamedTemporaryFile(suffix='.%s' % destination_format,
+                        dir=self.file.directory_name).name
     command = ["convert", self.file.getUrl(), output_url]
     stdout, stderr = Popen(command,
                           stdout=PIPE,
