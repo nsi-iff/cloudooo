@@ -34,16 +34,18 @@ from cloudooo.handler.pdf.granulator import PDFGranulator
 class TestPDFGranulator(HandlerTestCase):
 
   def afterSetUp(self):
-    data = open('./data/test.pdf').read()
     self.kw = dict(env=dict(PATH=self.env_path))
-    self.pdfgranulator = PDFGranulator(self.tmp_url, data, 'pdf', **self.kw)
+
 
   def testGetImageItemList(self):
     """Test if getImageItemList() returns the right images list"""
-    image_list = self.pdfgranulator.getImageItemList()
+    data = open('./data/test.pdf').read()
+    pdfgranulator = PDFGranulator(self.tmp_url, data, 'pdf', **self.kw)
+    image_list = pdfgranulator.getImageItemList()
     self.assertEquals(image_list[0][0], '001-pag001.png')
     self.assertEquals(image_list[-1][0], '012-pag004.jpg')
     self.assertEquals(len(image_list), 12)
+
 
 def test_suite():
   return make_suite(TestPDFGranulator)
