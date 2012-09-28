@@ -73,7 +73,6 @@ class Handler(object):
                           stderr=PIPE,
                           close_fds=True,
                           env=self.environment).communicate()
-    self.file.trash()
     metadata_dict = {}
     for std in stdout.split("\n"):
       std = std.strip()
@@ -83,6 +82,7 @@ class Handler(object):
         else:
           key, value = std.split(":")
         metadata_dict[key] = value.strip()
+    self.file.trash()
     return metadata_dict
 
   def setMetadata(self, metadata={}):
