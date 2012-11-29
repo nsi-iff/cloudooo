@@ -30,7 +30,8 @@ from cloudooo.file import File
 from cloudooo.util import logger
 from cloudooo.handler.imagemagick.handler import Handler
 from subprocess import Popen, PIPE
-from tempfile import mkdtemp
+from tempfile import mkdtemp, NamedTemporaryFile
+from lxml import etree
 from glob import glob
 import shutil
 import os
@@ -39,6 +40,13 @@ try:
   import Image
 except ImportError:
   from PIL import Image
+
+def get_text(element):
+  try:
+    txt = element[0].text
+  except:
+    txt = element.text
+  return txt
 
 def removeEqualImages(path):
   """This function verify if images are equals and remove it from path
@@ -85,6 +93,8 @@ def getImages(images):
       imagesList.append([title.split("/")[-1], open(image).read()])
   return imagesList
 
+
+
 class PDFGranulator(object):
 
   def __init__(self, base_folder_url, data, source_format, **kw):
@@ -101,8 +111,123 @@ class PDFGranulator(object):
                           stderr=PIPE,
                           close_fds=True,
                           env=self.environment).communicate()
-    removeEqualImages(self.grain_directory)
-    images = glob("%s/*.*"%self.grain_directory)
-    imagesList = getImages(images)
+    # XXX - PDF can be protect
+    if 'Erro' in stderr:
+      return False
+    else:
+      removeEqualImages(self.grain_directory)
+      images = glob("%s/*.*"%self.grain_directory)
+      imagesList = getImages(images)
+      return imagesList
+
+  def getTableItemList(self):
+    """Returns the list of table title"""
+    tables = self.getTablesMatrix()
+    if tables == False:
+      return "PDF Protect or have no Table Item List"
+    else:
+      table_list = tables.keys()
+      return table_list
+
+  def getTable(self, id, format='html'):
+    """Returns the table into html format."""
+    try:
+      table_matrix = self.getTablesMatrix()[id]
+      content = '<html><body><h1> %s </h1><table>' % id
+      for line in table_matrix:
+        content += '<tr>'
+        for column in line:
+          if not type(column) == list:
+            content += '<td> %s </td>' % column
+          else:
+            content +='<td>'
+            for element in column:
+              content += '%s </br>' % element
+            content += '</td>'
+        content +='</tr>'
+      content += '</table></body></html>'
+      return content
+    except:
+      return "PDF Protect or have no table with this id"
+
+
+  def getTablesMatrix(self):
+    """Returns the table as a matrix"""
+    logger.debug("PDFTableGrainExtract")
+    output_url = NamedTemporaryFile(suffix=".xml",dir=self.file.directory_name).name
+    command = ["pdftohtml", "-xml",  self.file.getUrl(), output_url]
+    stdout, stderr = Popen(command,
+                          stdout=PIPE,
+                          stderr=PIPE,
+                          close_fds=True,
+                          env=self.environment).communicate()
+    # XXX - PDF can be protect
+    if 'Erro' in stderr:
+      return False
+    else:
+      output = etree.fromstring(open(output_url).read())
+      row_list = output.xpath('//text')
+      name,previous,next = '', '', ''
+      tables = {}
+      element = []
+      line = []
+      matrix = []
+      i,j,l,m = 0,0,0,0
+      old_x_left = 600
+      for x in row_list:
+        base_line = x.attrib['top']
+        base_column = x.attrib['left']
+        i += 1
+        for y in row_list[i:]:
+          if base_line == y.attrib['top']:
+            l += 1
+            line.append(get_text(y))
+            base_column = y.attrib['left']
+            row_list.remove(y)
+          elif base_column == y.attrib['left']:
+            m = l
+            if len(element) > 0:
+              element.append(get_text(y))
+            # In case name of the table is after table
+            if len(line) == 0:
+              next = get_text(x)
+              if next != None and len(next.split(':')) == 2:
+                name = next
+                next = ''
+            elif len(line) > 0:
+              element.append(line.pop())
+              element.append(get_text(y))
+          else:
+            if len(element) > 0:
+              line.insert(m-1,element)
+            l = 0
+            element = []
+            base_column = 0
+            break
+
+        if len(line)>0:
+          # In case name of the table is before table
+          previous = get_text(x.getprevious())
+          if previous != None and len(previous.split(':')) == 2:
+            name = previous
+            previous = ''
+          line.insert(0,get_text(x))
+          if len(line) > 1:
+            matrix.append(line)
+        line = []
+        if x.attrib['left'] < old_x_left and len(matrix)>0:
+          if len(matrix)>0:
+            j += 1
+            if name == '':
+              name = "Tabela %d" % j
+            name += " - pag %s" % x.getparent().attrib['number']
+            tables[name]= matrix
+          name = ''
+          matrix = []
+        old_x_left = x.attrib['left']
+      return tables
+
+
+  def trash(self):
+    """Remove file from memory"""
     self.file.trash()
-    return imagesList
