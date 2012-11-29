@@ -41,6 +41,7 @@ from fnmatch import fnmatch
 #XXX Must be removed
 from cloudooo.handler.ooo.granulator import OOGranulator
 from cloudooo.handler.ooo.mimemapper import mimemapper
+from cloudooo.handler.pdf.granulator import PDFGranulator
 
 class HandlerNotFound(Exception):
   pass
@@ -288,6 +289,50 @@ class Manager(object):
       logger.error(e)
       return (402, {}, e.args[0])
 
+
+  def granulateFile(self, data, source_format="odt"):
+    """This function allows BD NSI's project to completely granulate 
+    document file"""
+    if source_format.lower() == "pdf":
+      pdfgranulator = PDFGranulator(self._path_tmp_dir, decodestring(data), 'pdf',
+                                **self.kw)
+      table_list = pdfgranulator.getTableItemList()
+      grains = []
+      if table_list != 'PDF Protect or have no Table Item List':
+        tables = []
+        for item in table_list:
+          table = pdfgranulator.getTable(item)
+          tables.append(table)
+        grains = map(encodestring, tables)
+      images = pdfgranulator.getImageItemList()
+      if images != False:
+        # XXX - encodestring cant convert list
+        grains += map(encodestring, str(images))
+
+      # XXX - if has no grains
+      if grains == []:
+        return "This PDF is protect or has no grains"
+      return grains
+    
+    else:
+      try:
+        document = self._getOOGranulator(data, source_format)
+        table_list = document.getTableItemList()
+        tables = []
+        for table in table_list:
+          tables.append(document.getTable(table[0], 'odt'))
+        grains = tables
+        image_list = document.getImageItemList()
+        images = []
+        for image in image_list:
+          images.append(document.getImage(image[0]))
+        grains += image
+        return map(encodestring,grains)
+      except:
+        raise NotImplementedError
+
+
+  # XXX - This should be rewritten for all granulators
   def _getOOGranulator(self, data, source_format="odt"):
     """Returns an instance of the handler OOGranulator after convert the
     data to 'odt'"""
