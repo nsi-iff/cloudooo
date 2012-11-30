@@ -30,12 +30,14 @@
 from cloudooo.handler.pdf.handler import Handler
 from cloudooo.tests.handlerTestCase import HandlerTestCase, make_suite
 from types import DictType
+from magic import Magic
 
 
 class TestHandler(HandlerTestCase):
 
   def afterSetUp(self):
     self.kw = dict(env=dict(PATH=self.env_path))
+    self.file_detector = Magic(mime=True)
 
   def testConvertPDFtoText(self):
     """Test conversion of pdf to txt"""
@@ -43,6 +45,16 @@ class TestHandler(HandlerTestCase):
     handler = Handler(self.tmp_url, pdf_document, "pdf", **self.kw)
     txt_document = handler.convert("txt")
     self.assertTrue(txt_document.startswith("UNG Docs Architecture"))
+
+
+  def testConvertPDFtoText(self):
+    """Test conversion of ps to pdf"""
+    ps_document = open("data/test.ps").read()
+    handler = Handler(self.tmp_url, ps_document, "ps", **self.kw)
+    pdf_document = handler.convert("pdf")
+    mimetype = self.file_detector.from_buffer(pdf_document)
+    self.assertEquals(mimetype, "application/pdf")
+
 
   def testgetMetadata(self):
     """Test if the metadata are extracted correctly"""
