@@ -47,11 +47,16 @@ class Handler(object):
 
   def convert(self, destination_format=None, **kw):
     """ Convert a pdf document """
-    logger.debug("PDFConvert: %s > %s" % (self.document.source_format, destination_format))
+    logger.debug("PDFConvert: %s > %s" % (self.document.source_format, 
+                                        destination_format))
     output_url = NamedTemporaryFile(suffix=".%s" % destination_format,
                         dir=self.document.directory_name).name
     if self.document.source_format == 'ps':
-      command = ["ps2pdf", "-dASCII85EncodePages=false", "-dLanguageLevel=1", self.document.getUrl(), output_url]
+      command = ["ps2pdf",
+                "-dASCII85EncodePages=false",
+                "-dLanguageLevel=1",
+                self.document.getUrl(),
+                output_url]
     else:
       command = ["pdftotext", self.document.getUrl(), output_url]
     stdout, stderr = Popen(command,

@@ -46,8 +46,7 @@ class TestHandler(HandlerTestCase):
     txt_document = handler.convert("txt")
     self.assertTrue(txt_document.startswith("UNG Docs Architecture"))
 
-
-  def testConvertPDFtoText(self):
+  def testConvertPStoPDF(self):
     """Test conversion of ps to pdf"""
     ps_document = open("data/test.ps").read()
     handler = Handler(self.tmp_url, ps_document, "ps", **self.kw)
