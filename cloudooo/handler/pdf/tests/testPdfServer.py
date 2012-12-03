@@ -50,6 +50,8 @@ class TestServer(TestCase):
             (open(join('data', 'test.pdf')).read(), 'pdf', 'xyz'),
             # Try convert one video to format not possible
             (open(join('data', 'test.pdf')).read(), 'pdf', 'ogv'),
+            # Try convert one video to format not possible
+            (open(join('data', 'test_protect.pdf')).read(), 'pdf', 'txt'),
             ]
 
   def testFaultConversion(self):
